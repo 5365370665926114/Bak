@@ -435,10 +435,10 @@
         // SISTEMA DE MÚSICA 
         // ==========================================
         const playlist = [
-            'musicas/musica1.mp3',
-            'musicas/musica2.mp3',
-            'musicas/musica3.mp3',
-            'musicas/musica4.mp3'
+            'assets/music/musica1.mp3',
+            'assets/music/musica2.mp3',
+            'assets/music/musica3.mp3',
+            'assets/music/musica4.mp3'
         ];
         
         let currentTrack = 0;
@@ -464,14 +464,18 @@
 
         function togglePlay() {
             if (audioObj.paused) {
-                audioObj.play();
-                btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                musicStarted = true;
-                
-                if (!webhookPlayEnviado) {
-                    enviarWebhook("🎵 **Atenção:** Ela clicou no botão Play e a música começou a tocar!");
-                    webhookPlayEnviado = true;
-                }
+                audioObj.play().then(() => {
+                    btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    musicStarted = true;
+                    
+                    if (!webhookPlayEnviado) {
+                        enviarWebhook("🎵 **Atenção:** Ela clicou no botão Play e a música começou a tocar!");
+                        webhookPlayEnviado = true;
+                    }
+                }).catch(error => {
+                    btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+                    console.log("Não foi possível iniciar a música.");
+                });
             } else {
                 audioObj.pause();
                 btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
@@ -481,17 +485,23 @@
         function nextTrack() {
             currentTrack = (currentTrack + 1) % playlist.length;
             audioObj.src = playlist[currentTrack];
-            audioObj.play();
-            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            musicStarted = true;
+            audioObj.play().then(() => {
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                musicStarted = true;
+            }).catch(error => {
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+            });
         }
 
         function prevTrack() {
             currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
             audioObj.src = playlist[currentTrack];
-            audioObj.play();
-            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            musicStarted = true;
+            audioObj.play().then(() => {
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                musicStarted = true;
+            }).catch(error => {
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+            });
         }
 
         btnPlayPause.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
