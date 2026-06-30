@@ -449,13 +449,18 @@
         let musicStarted = false;
         let webhookPlayEnviado = false;
 
-        const tryPlay = () => {
-            audioObj.play().then(() => {
+        const playAudio = () => audioObj.play().then(() => {
                 btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 musicStarted = true;
+                return true;
             }).catch(error => {
-                console.log("Autoplay bloqueado. Aguardando interação.");
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+                console.log("Reprodução bloqueada ou indisponível. Aguardando interação.");
+                return false;
             });
+
+        const tryPlay = () => {
+            playAudio();
         };
 
         window.addEventListener('load', tryPlay);
@@ -464,14 +469,11 @@
 
         function togglePlay() {
             if (audioObj.paused) {
-                audioObj.play();
-                btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                musicStarted = true;
-                
-                if (!webhookPlayEnviado) {
+                playAudio().then((tocou) => {
+                    if (!tocou || webhookPlayEnviado) return;
                     enviarWebhook("🎵 **Atenção:** Ela clicou no botão Play e a música começou a tocar!");
                     webhookPlayEnviado = true;
-                }
+                });
             } else {
                 audioObj.pause();
                 btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
@@ -481,17 +483,13 @@
         function nextTrack() {
             currentTrack = (currentTrack + 1) % playlist.length;
             audioObj.src = playlist[currentTrack];
-            audioObj.play();
-            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            musicStarted = true;
+            playAudio();
         }
 
         function prevTrack() {
             currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
             audioObj.src = playlist[currentTrack];
-            audioObj.play();
-            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            musicStarted = true;
+            playAudio();
         }
 
         btnPlayPause.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
