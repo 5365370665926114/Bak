@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Você</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* =========================================
+           Reset e Variáveis
+           ========================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #05070f;
+            --accent: #f0a8c2;
+            --text-light: #fdfdfd;
+            --text-muted: #b0b3c0;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(15px);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* =========================================
+           Fundo Estrelado
+           ========================================= */
+        #starfield {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #0a0e1c 0%, var(--bg-deep) 100%);
+        }
+
+        /* =========================================
+           Estrutura Principal
+           ========================================= */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem 8rem 1.5rem;
+            position: relative;
+            z-index: 10;
+            transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s;
+        }
+
+        .hidden-view {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+
+        /* =========================================
+           Textos e Imagem Principal
+           ========================================= */
+        h1.title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+            text-shadow: 0 0 20px rgba(240, 168, 194, 0.3);
+            animation: fadeInDown 1.5s ease;
+        }
+
+        .main-image {
+            display: block;
+            margin: 0 auto 2.5rem auto;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4), 0 0 20px rgba(240, 168, 194, 0.15);
+            animation: fadeInDown 1.5s ease 0.2s both;
+        }
+
+        .intro-text {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            font-size: 1rem;
+            color: var(--text-muted);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeInUp 1.5s ease 0.4s both;
+        }
+
+        .intro-text p { margin-bottom: 1rem; }
+        .intro-text p:last-child { margin-bottom: 0; }
+
+        /* =========================================
+           Cards
+           ========================================= */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            animation: fadeInUp 1.5s ease 0.6s both;
+        }
+
+        @media (min-width: 600px) {
+            .cards-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .card:hover, .card:active {
+            transform: translateY(-5px);
+            border-color: rgba(240, 168, 194, 0.4);
+            box-shadow: 0 10px 40px rgba(240, 168, 194, 0.1);
+        }
+
+        .card i { font-size: 2.5rem; color: var(--accent); transition: transform 0.4s ease; }
+        .card h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 400; }
+
+        /* =========================================
+           Modais
+           ========================================= */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 7, 15, 0.92);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.6s ease, visibility 0.6s;
+            padding: 1.5rem;
+        }
+
+        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.6s ease;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+        }
+
+        .modal.active .modal-content { transform: translateY(0); }
+
+        .btn-voltar {
+            position: absolute;
+            top: 1rem; right: 1.5rem;
+            background: none; border: none;
+            color: var(--text-light);
+            font-size: 1.5rem; cursor: pointer;
+            z-index: 110;
+        }
+
+        /* --- Carta --- */
+        #textoCarta {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem; line-height: 1.8;
+            white-space: pre-wrap; color: var(--text-light);
+        }
+
+        /* --- Galeria --- */
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem; }
+        .gallery-item {
+            width: 100%; aspect-ratio: 1; object-fit: cover;
+            border-radius: 12px; cursor: pointer; border: 1px solid var(--glass-border);
+        }
+        #lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 200;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; pointer-events: none; transition: 0.4s;
+        }
+        #lightbox.active { opacity: 1; visibility: visible; pointer-events: auto; }
+        #lightbox img { max-width: 90%; max-height: 80vh; border-radius: 8px; }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
+
+        /* --- Lista de Frases --- */
+        .frases-list { list-style: none; margin-top: 1rem; }
+        .frases-list li {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem; line-height: 1.6; margin-bottom: 2rem;
+            color: var(--text-light); position: relative; padding-left: 2rem; font-style: italic;
+        }
+        .frases-list li i { position: absolute; left: 0; top: 5px; font-size: 0.9rem; color: var(--accent); }
+
+        /* --- Última Surpresa & Feedback --- */
+        #modalSurpresa { background: #000; z-index: 300; }
+        
+        .surpresa-wrapper {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 100%; height: 100%; position: relative; overflow-y: auto; padding: 2rem 0;
+            scrollbar-width: none;
+        }
+        .surpresa-wrapper::-webkit-scrollbar { display: none; }
+
+        .surpresa-texto {
+            font-family: 'Playfair Display', serif; font-size: 1.5rem; text-align: center;
+            position: absolute; width: 90%; opacity: 0; transition: opacity 2s ease-in-out;
+            color: var(--text-light); top: 50%; transform: translateY(-50%); pointer-events: none;
+        }
+
+        .final-content {
+            display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 400px;
+        }
+
+        .heart-final {
+            font-size: 4rem; color: #ff4d6d; opacity: 0; transform: scale(0.5);
+            transition: all 3s ease; margin-bottom: 1rem;
+        }
+        .heart-final.pulsing { opacity: 1; transform: scale(1); animation: pulse 2s infinite; }
+        
+        .texto-final { 
+            font-family: 'Playfair Display', serif; font-size: 2.2rem; opacity: 0; transition: opacity 2s ease; margin-bottom: 1rem; text-align: center;
+        }
+        .texto-sub-final {
+            font-family: 'Montserrat', sans-serif; font-size: 1rem; color: var(--text-muted);
+            opacity: 0; transition: opacity 2.5s ease; font-style: italic; font-weight: 300; text-align: center; max-width: 90%; margin-bottom: 2rem;
+        }
+
+        /* --- Formulário de Feedback Final --- */
+        .feedback-container {
+            width: 90%; opacity: 0; pointer-events: none; transition: opacity 2s ease;
+            display: flex; flex-direction: column; align-items: center; gap: 1rem;
+        }
+        .feedback-msg { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; color: var(--text-light); text-align: center; }
+        
+        .feedback-input {
+            width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 1rem; color: var(--text-light); font-family: 'Montserrat', sans-serif;
+            outline: none; transition: all 0.3s ease; font-size: 0.95rem;
+        }
+        .feedback-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .feedback-input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.12); }
+        
+        .feedback-btn {
+            background: var(--accent); color: var(--bg-deep); border: none;
+            padding: 0.8rem 2rem; border-radius: 30px; font-family: 'Montserrat', sans-serif;
+            font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; width: 100%;
+        }
+        .feedback-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(240, 168, 194, 0.4); }
+        
+        .feedback-status { font-size: 0.9rem; color: var(--accent); opacity: 0; transition: opacity 0.5s; font-weight: 500; }
+
+        /* =========================================
+           Player Flutuante de Música
+           ========================================= */
+        .music-player {
+            position: fixed; bottom: 20px; right: 50%; transform: translateX(50%);
+            background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 40px; display: flex; align-items: center; gap: 12px;
+            padding: 10px 20px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: max-content;
+        }
+        .music-player button { background: none; border: none; color: var(--text-light); font-size: 1.1rem; cursor: pointer; transition: color 0.3s, transform 0.2s; display: flex; align-items: center; justify-content: center; }
+        .music-player button:hover { color: var(--accent); transform: scale(1.1); }
+        #btnPlayPause { font-size: 1.5rem; color: var(--accent); margin: 0 5px; }
+        .vol-btn { font-size: 0.9rem !important; color: var(--text-muted) !important; }
+        .vol-btn:hover { color: var(--text-light) !important; }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 40px rgba(255, 77, 109, 0.8)); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <canvas id="starfield"></canvas>
+
+    <div class="music-player">
+        <button id="btnVolDown" class="vol-btn"><i class="fa-solid fa-volume-low"></i></button>
+        <button id="btnPrev"><i class="fa-solid fa-backward-step"></i></button>
+        <button id="btnPlayPause"><i class="fa-solid fa-play"></i></button>
+        <button id="btnNext"><i class="fa-solid fa-forward-step"></i></button>
+        <button id="btnVolUp" class="vol-btn"><i class="fa-solid fa-volume-high"></i></button>
+    </div>
+
+    <main class="main-container" id="mainView">
+        <h1 class="title">Feliz aniversário.</h1>
+        
+        <img src="https://cdn.discordapp.com/attachments/1484271941987733728/1521597483858268331/Screenshot_20260630-142920.jpg?ex=6a456996&is=6a441816&hm=ec3df5c478a61791d5fe9f1469b02bd14dbeb751fe0ba43273801421c9e76cfd&" alt="Nós" class="main-image">
+        
+        <div class="intro-text">
+            <p>Se você chegou até aq, significa q acertou a senha.</p>
+            
+            <p>Bom... agr essa surpresa é só sua.</p>
+            <p>Eu podia simplesmente mandar um Feliz Aniversário igual todo mundo faz, mas vc merece algo diferente. Ent resolvi criar esse pequeno lugar, feito especialmente para vc.</p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card" id="btnCarta">
+                <i class="fa-regular fa-envelope"></i>
+                <h3>Minha carta</h3>
+            </div>
+            <div class="card" id="btnMemoria">
+                <i class="fa-regular fa-images"></i>
+                <h3>Nossas memórias</h3>
+            </div>
+            <div class="card" id="btnFrases">
+                <i class="fa-regular fa-star"></i>
+                <h3>Coisas que talvez você nunca soube</h3>
+            </div>
+            <div class="card" id="btnSurpresa">
+                <i class="fa-solid fa-gift"></i>
+                <h3>Última surpresa</h3>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal" id="modalCarta">
+        <div class="modal-content">
+            <button class="btn-voltar" id="fecharCarta"><i class="fa-solid fa-xmark"></i></button>
+            <div id="textoCarta"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalMemoria">
+        <div class="modal-content">
+            <button class="btn-voltar" id="fecharMemoria"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="font-family: 'Playfair Display'; text-align:center; margin-bottom: 1rem;">Nossas memórias</h2>
+            <div class="gallery-grid">
+                <img src="https://cdn.discordapp.com/attachments/1484271941987733728/1521606317360418956/Screenshot_20250207_005102_Free_Fire.jpg?ex=6a4571d0&is=6a442050&hm=09351d6a59bf78ba5aa640b57cdf7d58f3839a5e4f971f2f70765670eb2c7cc8&" class="gallery-item" alt="Memória 1">
+                <img src="https://cdn.discordapp.com/attachments/1484271941987733728/1521606316831801384/20250203_230252.jpg?ex=6a4571d0&is=6a442050&hm=2fdaf8df76bf63be5cf38ff0d65218ca1570351f2f5e9464c6efc4f538cf1250&" class="gallery-item" alt="Memória 2">
+                <img src="https://cdn.discordapp.com/attachments/1484271941987733728/1521606317633179748/Screenshot_20250322_123554_Discord.jpg?ex=6a4571d0&is=6a442050&hm=fb4fade2b42967ebf1c780744537691f8e237e62eabd5c706008725cc042adee&" class="gallery-item" alt="Memória 3">
+                <img src="https://cdn.discordapp.com/attachments/1484271941987733728/1521606318006206555/Screenshot_20250330_024058_Free_Fire.jpg?ex=6a4571d0&is=6a442050&hm=df627570a8612351339dd9c6452b0dc27a6c6e8136bdb692cd28467b92b13821&" class="gallery-item" alt="Memória 4">
+                <img src="https://cdn.discordapp.com/attachments/1484271941987733728/1521606318606254191/Screenshot_20250324_221603_One_UI_Home.jpg?ex=6a4571d0&is=6a442050&hm=8c3d93e5cf905e428765a826f6b12956fc8faa01849f96b5acebf6f8540e0959&" class="gallery-item" alt="Memória 5">
+                <img src="https://cdn.discordapp.com/attachments/1484271941987733728/1521606319071563776/Screenshot_20250404_174647_WhatsApp2.jpg?ex=6a4571d0&is=6a442050&hm=db932300d836d9fecfd90bca72df5172dfc5a31313b64559bbadb999b12ab9b0&" class="gallery-item" alt="Memória 6">
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox">
+        <span class="lightbox-close" id="fecharLightboxBtn"><i class="fa-solid fa-xmark"></i></span>
+        <img id="lightbox-img" src="" alt="">
+    </div>
+
+    <div class="modal" id="modalFrases">
+        <div class="modal-content">
+            <button class="btn-voltar" id="fecharFrases"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="font-family: 'Playfair Display'; text-align:center; margin-bottom: 1.5rem; color: var(--accent);">Coisas que talvez você nunca soube</h2>
+            <ul class="frases-list" id="listaFrases"></ul>
+        </div>
+    </div>
+
+    <div class="modal" id="modalSurpresa">
+        <button class="btn-voltar" id="fecharSurpresa" style="display:none;"><i class="fa-solid fa-xmark"></i></button>
+        
+        <div class="surpresa-wrapper">
+            <div class="surpresa-texto" id="st1">Existe uma última coisa que eu queria te falar...</div>
+            <div class="surpresa-texto" id="st2">Independentemente do que aconteceu entre nós, eu nunca vou desejar outra coisa além da sua felicidade.</div>
+            <div class="surpresa-texto" id="st3">Espero que você realize todos os seus sonhos.</div>
+            <div class="surpresa-texto" id="st4">Que você encontre pessoas que cuidem de você, façam você sorrir e te valorizem todos os dias.</div>
+            <div class="surpresa-texto" id="st5">Obrigado por cada lembrança que fez parte da minha vida.</div>
+            
+            <div class="final-content">
+                <i class="fa-solid fa-heart heart-final" id="heartFinal"></i>
+                <div class="texto-final" id="st6">Feliz aniversário. ❤️</div>
+                <div class="texto-sub-final" id="st7">Foi bom enquanto durou... Quem sabe um dia o universo faça a gente se trombar no futuro.</div>
+                
+                <div class="feedback-container" id="feedbackContainer">
+                    <p class="feedback-msg">Exagerei demais(eu acho) quer falar alguma coisa? Kkkkkkk</p>
+                    <input type="text" id="feedbackInput" class="feedback-input" placeholder="Escreva aqui..." autocomplete="off">
+                    <button id="btnEnviarMensagem" class="feedback-btn">Enviar</button>
+                    <span id="feedbackStatus" class="feedback-status">Mensagem enviada! ❤️</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // FUNÇÃO DE WEBHOOK COM HORÁRIO
+        // ==========================================
+        function enviarWebhook(mensagem) {
+            const agora = new Date();
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const minuto = String(agora.getMinutes()).padStart(2, '0');
+            const horario = `[${hora}:${minuto}]`;
+
+            const webhookUrl = "https://discord.com/api/webhooks/1497762749197979891/pW2AIflIRCva6sl_rRl2YysC1LUBqCVA7fy5bKu8feGGIsAYMGawbo1XKrH7K_DpV9qv";
+            
+            fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: `${horario} ${mensagem}` })
+            }).catch(error => console.log("Erro ao enviar webhook."));
+        }
+
+        // ==========================================
+        // SISTEMA DE MÚSICA 
+        // ==========================================
+        const playlist = [
+            'musicas/musica1.mp3',
+            'musicas/musica2.mp3',
+            'musicas/musica3.mp3',
+            'musicas/musica4.mp3'
+        ];
+        
+        let currentTrack = 0;
+        const audioObj = new Audio(playlist[currentTrack]);
+        audioObj.volume = 0.2; // Começa baixinho
+        
+        const btnPlayPause = document.getElementById('btnPlayPause');
+        let musicStarted = false;
+        let webhookPlayEnviado = false;
+
+        const tryPlay = () => {
+            audioObj.play().then(() => {
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                musicStarted = true;
+            }).catch(error => {
+                console.log("Autoplay bloqueado. Aguardando interação.");
+            });
+        };
+
+        window.addEventListener('load', tryPlay);
+        document.body.addEventListener('click', () => { if (!musicStarted && audioObj.paused) tryPlay(); }, { once: true }); 
+        audioObj.addEventListener('ended', nextTrack);
+
+        function togglePlay() {
+            if (audioObj.paused) {
+                audioObj.play();
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                musicStarted = true;
+                
+                if (!webhookPlayEnviado) {
+                    enviarWebhook("🎵 **Atenção:** Ela clicou no botão Play e a música começou a tocar!");
+                    webhookPlayEnviado = true;
+                }
+            } else {
+                audioObj.pause();
+                btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+            }
+        }
+
+        function nextTrack() {
+            currentTrack = (currentTrack + 1) % playlist.length;
+            audioObj.src = playlist[currentTrack];
+            audioObj.play();
+            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            musicStarted = true;
+        }
+
+        function prevTrack() {
+            currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
+            audioObj.src = playlist[currentTrack];
+            audioObj.play();
+            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            musicStarted = true;
+        }
+
+        btnPlayPause.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+        document.getElementById('btnNext').addEventListener('click', (e) => { e.stopPropagation(); nextTrack(); });
+        document.getElementById('btnPrev').addEventListener('click', (e) => { e.stopPropagation(); prevTrack(); });
+
+        document.getElementById('btnVolUp').addEventListener('click', (e) => {
+            e.stopPropagation(); if (audioObj.volume < 1.0) audioObj.volume = Math.min(1.0, audioObj.volume + 0.1);
+        });
+        document.getElementById('btnVolDown').addEventListener('click', (e) => {
+            e.stopPropagation(); if (audioObj.volume > 0.0) audioObj.volume = Math.max(0.0, audioObj.volume - 0.1);
+        });
+
+        // ==========================================
+        // SISTEMA DE ESTRELAS
+        // ==========================================
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let estrelasAceleradas = false;
+        
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5; this.speed = Math.random() * 0.2 + 0.05;
+                this.opacity = Math.random(); this.fadeDir = Math.random() > 0.5 ? 1 : -1;
+            }
+            update() {
+                this.y -= estrelasAceleradas ? this.speed * 5 : this.speed;
+                if (this.y < 0) { this.y = canvas.height; this.x = Math.random() * canvas.width; }
+                this.opacity += 0.01 * this.fadeDir;
+                if (this.opacity >= 1) this.fadeDir = -1; if (this.opacity <= 0.1) this.fadeDir = 1;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        for (let i = 0; i < 150; i++) stars.push(new Star());
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => { star.update(); star.draw(); });
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+
+        // ==========================================
+        // INTERFACE MODAIS E CLIQUES
+        // ==========================================
+        const mainView = document.getElementById('mainView');
+
+        function abrirModal(id) {
+            mainView.classList.add('hidden-view');
+            document.getElementById(id).classList.add('active');
+        }
+        function fecharModal(id) {
+            document.getElementById(id).classList.remove('active');
+            setTimeout(() => { mainView.classList.remove('hidden-view'); }, 500);
+        }
+
+        // ==========================================
+        // CARTA
+        // ==========================================
+        const textoCartaElement = document.getElementById('textoCarta');
+        const textoDaCarta = `Feliz aniversário, Sua lindona❤️
+
+Caraio, eu tô aqui um tempão com o peito apertado, mão tremendo, apagando e escrevendo de novo porque n existe palavra humana capaz de explicar o q vc representa p mim. Isso q eu sinto n é amor. É uma porra de uma loucura de macumba (zoas kkkkkk), Acho q nenhum homem no mundo teria coragem de confessar o q eu vou confessar agora , nmrl, mas fds. Vc merece tudo.
+
+Aquele “ppdo” maravilhoso q vc falava era o som q salvava meus dias. Vc falava pra caralho, sem parar, com aquela voz linda, doce, maravilhosa e aquela energia q iluminava até os meus piores momentos.
+
+Só q dentro de mim era um inferno. Eu tinha paranoias absurdas com vc, ciúme de doído q me consumia p krlh. Imaginava merda q nem existia, morria de medo de te perder pra qualquer coisa, mentia, brigava direto, sufocava tudo pq te amava com uma força q me enlouquecia. Eu te fodi pra prr com meus problemas de casa, com minha cabeça bagunçada, com meu egoísmo. Te magoei de jeitos que eu nunca vou me perdoar.
+
+E agora? Agr eu tenho condição pra basicamente tudo. Posso sair dessa cdd, atravessar o Brasil inteiro e te encontrar pessoalmente. Poderia te olhar nos olhos, te abraçar, te pedir perdão de joelhos. Mas eu n vou. Eu n consigo. A culpa é um abismo sem fundo. Eu te machuquei tanto q olhar pra vc seria como te destruir de novo. Eu prefiro carregar essa dor eterna do q te condenar a viver com o peso do q eu fiz.
+
+Manu… vc é uma deusa. Uma porra de uma deusa q desceu só pra foder com a minha existência de um jeito lindo. Como uma única alma conseguiu virar o centro absoluto do meu universo? Como vc, só com palavras e risadas, conseguia acalmar meus demônios e ao mesmo tempo acender um incêndio dentro de mim? Você era luz pura, era paz, era tempestade, era o sentido da porra da minha vida. Eu te amava como se você fosse o ar que eu respiro, o céu q eu olho, o fogo que me queima e me refaz. Uma conexão tão profunda, tão inexplicável, q parecia que nossas almas já se conheciam antes mesmo de a gente nascer. Vc virou minha obsessão mais sagrada.
+
+Eu te amo com uma intensidade q me destrói e me reconstrói todos os dias. Amo cada palavra q vc falava sem parar, amo suas manhas, amo até as brigas q a gente tinha pq eram prova q o que sentíamos era grande demais pro mundo suportar. Esse amor era tão maluco, tão absoluto, q me faz ter crise existencial só de lembrar de vc. vc mudou minha alma pra sempre. Me ensinou o q é amar de verdade e o q é destruir o paraíso com as próprias mãos.
+
+Por isso, Manuzinha… eu acho que o melhor pra nós dois é seguir em frente. Eu te amo demais pra te prender na minha bagagem. Vc merece o mundo inteiro, leve, sem peso, sem passado sangrando. Merece ser adorada como a deusa q vc é, por alguém q n carregue todo esse arrependimento. Eu vou te soltar. Vou te liberar pro universo com o coração sangrando, mas com a certeza de q é o certo.
+
+Mesmo assim, eu vou continuar te amando em silêncio, de longe, com cada pedaço fodido e inteiro do meu ser. Vou carregar cada “ppdo”, cada risada, cada madrugada como o tesouro mais sagrado da minha vida. Vc foi, é e sempre vai ser a coisa mais linda, mais inexplicável e mais importante q já existiu na minha existência.
+
+Feliz aniversário, minha deusa, meu eterno amor. Q sua vida seja um mar de luz, de paz e de felicidade absurda. Q todos te abrace como vc merece. Eu vou torcer por vc todos os dias, mesmo q nc mais a gente se fale.
+
+Eu te amo pra caralho.
+De um jeito que o universo inteiro não explica.
+Pra sempre, Manuzinha. ❤️`;
+        
+        // Coloca o texto da carta inteiro sem a animação
+        textoCartaElement.innerHTML = textoDaCarta.replace(/\n/g, '<br>');
+
+        document.getElementById('btnCarta').addEventListener('click', () => { 
+            abrirModal('modalCarta'); 
+            enviarWebhook("💌 **Atenção:** Ela abriu o cartão 'Minha carta'!");
+        });
+        
+        document.getElementById('fecharCarta').addEventListener('click', () => {
+            fecharModal('modalCarta');
+            enviarWebhook("❌ **Atenção:** Ela fechou a 'Minha carta'.");
+        });
+
+        // ==========================================
+        // GALERIA E FRASES
+        // ==========================================
+        document.getElementById('btnMemoria').addEventListener('click', () => abrirModal('modalMemoria'));
+        document.getElementById('btnFrases').addEventListener('click', () => abrirModal('modalFrases'));
+        
+        document.getElementById('fecharMemoria').addEventListener('click', () => fecharModal('modalMemoria'));
+        document.getElementById('fecharFrases').addEventListener('click', () => fecharModal('modalFrases'));
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        
+        document.querySelectorAll('.gallery-item').forEach(img => {
+            img.addEventListener('click', (e) => { lightboxImg.src = e.target.src; lightbox.classList.add('active'); });
+        });
+        document.getElementById('fecharLightboxBtn').addEventListener('click', () => lightbox.classList.remove('active'));
+
+        const frases = [
+            "Você talvez nunca tenha percebido, mas eu sabia diferenciar seu humor só pelo jeito que você digitava.",
+            "Às vezes eu entrava no zipzop sem motivo... só pra ver se você estava online.",
+            "Te conhecer pela internet me fez perceber que distância mede quilômetros, não importância.",
+            "A gente nunca dividiu o mesmo lugar, mas dividiu madrugadas que eu nunca vou esquecer.",
+            "Talvez você nunca tenha percebido... mas, durante um tempo, a pessoa que morava mais longe de mim era justamente a que fazia eu me sentir menos sozinho."
+        ];
+        
+        const listaFrasesElement = document.getElementById('listaFrases');
+        frases.forEach(frase => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fa-solid fa-star"></i> "${frase}"`;
+            listaFrasesElement.appendChild(li);
+        });
+
+        // ==========================================
+        // ÚLTIMA SURPRESA E FEEDBACK
+        // ==========================================
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        
+        document.getElementById('btnSurpresa').addEventListener('click', () => {
+            enviarWebhook("🎁 **Atenção:** Ela abriu o cartão 'Última surpresa'!");
+            iniciarSurpresa();
+        });
+
+        document.getElementById('fecharSurpresa').addEventListener('click', () => fecharModal('modalSurpresa'));
+
+        async function iniciarSurpresa() {
+            abrirModal('modalSurpresa');
+            
+            document.getElementById('fecharSurpresa').style.display = 'none';
+            
+            const st1 = document.getElementById('st1'); const st2 = document.getElementById('st2');
+            const st3 = document.getElementById('st3'); const st4 = document.getElementById('st4');
+            const st5 = document.getElementById('st5'); const heart = document.getElementById('heartFinal');
+            const st6 = document.getElementById('st6'); const st7 = document.getElementById('st7');
+            const feedbackBox = document.getElementById('feedbackContainer');
+
+            // Resetando estado inicial
+            [st1, st2, st3, st4, st5, st6, st7].forEach(el => el.style.opacity = 0);
+            feedbackBox.style.opacity = 0; 
+            feedbackBox.style.pointerEvents = 'none';
+            heart.classList.remove('pulsing');
+
+            await sleep(1000); st1.style.opacity = 1; await sleep(4000); st1.style.opacity = 0;
+            await sleep(2000); st2.style.opacity = 1; await sleep(5000); st2.style.opacity = 0;
+            await sleep(2000); st3.style.opacity = 1; await sleep(3500); st3.style.opacity = 0;
+            await sleep(2000); st4.style.opacity = 1; await sleep(5000); st4.style.opacity = 0;
+            await sleep(2000); st5.style.opacity = 1; await sleep(4500); st5.style.opacity = 0;
+            
+            // Grand Finale
+            await sleep(2000); 
+            estrelasAceleradas = true; 
+            heart.classList.add('pulsing'); 
+            st6.style.opacity = 1;
+            
+            await sleep(2500);
+            st7.style.opacity = 1;
+
+            // Mostra a caixa de mensagem e botão fechar
+            await sleep(2500);
+            document.getElementById('fecharSurpresa').style.display = 'block';
+            
+            // Usando JS para forçar opacidade e clique sobre o CSS
+            feedbackBox.style.opacity = 1;
+            feedbackBox.style.pointerEvents = 'auto';
+        }
+
+        // Evento de Enviar Feedback
+        document.getElementById('btnEnviarMensagem').addEventListener('click', () => {
+            const inputField = document.getElementById('feedbackInput');
+            const msg = inputField.value.trim();
+            const statusLabel = document.getElementById('feedbackStatus');
+            
+            if (msg !== "") {
+                enviarWebhook(`💬 **Mensagem da gata:** "${msg}"`);
+                
+                inputField.value = "";
+                statusLabel.style.opacity = 1;
+                
+                setTimeout(() => {
+                    statusLabel.style.opacity = 0;
+                }, 4000);
+            }
+        });
+    </script>
+</body>
+</html>
