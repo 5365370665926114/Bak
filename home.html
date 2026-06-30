@@ -435,10 +435,10 @@
         // SISTEMA DE MÚSICA 
         // ==========================================
         const playlist = [
-            'musicas/musica1.mp3',
-            'musicas/musica2.mp3',
-            'musicas/musica3.mp3',
-            'musicas/musica4.mp3'
+            'músicas/musica1.mp3',
+            'músicas/musica2.mp3',
+            'músicas/musica3.mp3',
+            'músicas/musica4.mp3'
         ];
         
         let currentTrack = 0;
@@ -481,17 +481,13 @@
         function nextTrack() {
             currentTrack = (currentTrack + 1) % playlist.length;
             audioObj.src = playlist[currentTrack];
-            audioObj.play();
-            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            musicStarted = true;
+            tryPlay();
         }
 
         function prevTrack() {
             currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
             audioObj.src = playlist[currentTrack];
-            audioObj.play();
-            btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            musicStarted = true;
+            tryPlay();
         }
 
         btnPlayPause.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
